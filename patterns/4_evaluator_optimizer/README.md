@@ -24,6 +24,23 @@ pip install -r requirements.txt
 3. Run the script:
 python example.py
 
+## Running the Gradio Interface
+
+To run the Gradio interface for this pattern:
+
+1. Ensure you have installed the required dependencies, including Gradio:
+
+pip install -r requirements.txt pip install gradio
+
+
+2. Run the Gradio app:
+python gradio_app.py
+
+
+3. Open your web browser and go to the URL displayed in the console (usually `http://127.0.0.1:7860`).
+
+4. Use the interface to interact with the pattern implementation.
+
 
 ## Expected Output
 

@@ -10,7 +10,7 @@ def classify_inquiry(inquiry):
     prompt = f"""
     Analyze the following customer inquiry. Identify the language and the main topic category.
     Return the result as a JSON object with keys 'language' and 'category'.
-    Language should be one of: 'English', 'Spanish', 'French', 'German', or 'Other'.
+    Language should be one of: 'English', 'Spanish', 'French', 'German', 'Danish', 'Swedish' or 'Other'.
     Category should be one of: 'Technical', 'Billing', 'Product', or 'General'.
 
     Customer Inquiry: "{inquiry}"

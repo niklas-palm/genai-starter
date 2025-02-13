@@ -3,7 +3,6 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-import random
 from common.bedrock_client import invoke_model, get_completion_from_response
 from common.utils import extract_and_load_json
 

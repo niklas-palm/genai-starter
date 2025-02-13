@@ -1,55 +1,96 @@
 import gradio as gr
-from example import summarize_review
-import concurrent.futures
+from example import (
+    generate_marketing_content_sequential,
+    generate_marketing_content_parallel
+)
 import time
 
-EXAMPLE_REVIEWS = """This smartphone is amazing! The camera quality is top-notch, and the battery life lasts all day. The screen is vibrant and responsive.
-I'm disappointed with this laptop. While it looks sleek, it runs slow and the fan is noisy. The keyboard feels cheap and the trackpad is not very responsive.
-These wireless earbuds exceeded my expectations. The sound quality is crisp and clear, with deep bass. They're comfortable to wear for hours.
-This smart home device is a game-changer. It's easy to set up and integrates well with other smart devices. The voice recognition is accurate.
-The fitness tracker is decent but not great. It accurately counts steps and monitors heart rate, but the sleep tracking seems off. Battery life is good."""
+EXAMPLE_PRODUCT = """Product: EcoTech Smart Water Bottle
+Price: $39.99
+Features:
+- Temperature monitoring and display
+- Hydration tracking with smartphone app
+- LED reminder system
+- 24-hour temperature retention
+- 750ml capacity
+- Made from recycled stainless steel
+- Available in: Ocean Blue, Forest Green, Sunset Orange
 
-def process_reviews_with_details(reviews):
-    review_list = reviews.split('\n')
-    start_time = time.time()
+Key Benefits:
+- Helps maintain optimal hydration
+- Eco-friendly materials
+- Smart technology integration
+- Premium build quality"""
+
+def process_product_info(product_info, execution_mode):
+    progress_output = ""
     
-    progress_output = "Starting parallel processing...\n"
-    summaries = []
-    
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        future_to_review = {executor.submit(summarize_review, review): review 
-                          for review in review_list}
+    if execution_mode == "Compare Both":
+        # Run sequential first
+        progress_output += "Running sequential execution...\n"
+        sequential_results, sequential_time = generate_marketing_content_sequential(product_info)
+        sequential_content = {result['platform']: result['content'] for result in sequential_results}
         
-        for future in concurrent.futures.as_completed(future_to_review):
-            review = future_to_review[future]
-            try:
-                summary = future.result()
-                summaries.append(summary)
-                progress_output += f"\nProcessed review: {review[:50]}...\n"
-                progress_output += f"Summary: {summary}\n"
-            except Exception as exc:
-                progress_output += f"\nError processing review: {review[:50]}...\n"
-                progress_output += f"Error: {str(exc)}\n"
+        progress_output += f"Sequential execution completed in {sequential_time:.2f} seconds\n\n"
+        
+        # Run parallel
+        progress_output += "Running parallel execution...\n"
+        parallel_results, parallel_time = generate_marketing_content_parallel(product_info)
+        parallel_content = {result['platform']: result['content'] for result in parallel_results}
+        
+        progress_output += f"Parallel execution completed in {parallel_time:.2f} seconds\n"
+        
+        # Calculate improvement
+        improvement = (sequential_time - parallel_time) / sequential_time * 100
+        progress_output += f"\nPerformance improvement with parallelization: {improvement:.1f}%"
+        
+        content = parallel_content  # Use parallel results for display
     
-    end_time = time.time()
-    final_output = f"Processed {len(summaries)} reviews in {end_time - start_time:.2f} seconds."
+    else:
+        # Run single mode (either sequential or parallel)
+        if execution_mode == "Sequential":
+            results, exec_time = generate_marketing_content_sequential(product_info)
+        else:  # Parallel
+            results, exec_time = generate_marketing_content_parallel(product_info)
+            
+        content = {result['platform']: result['content'] for result in results}
+        progress_output += f"{execution_mode} execution completed in {exec_time:.2f} seconds"
     
-    return progress_output, final_output, "\n\n".join(summaries)
+    return (
+        progress_output,
+        content.get('email', 'Error generating email content'),
+        content.get('instagram', 'Error generating Instagram content'),
+        content.get('website', 'Error generating website content')
+    )
 
 iface = gr.Interface(
-    fn=process_reviews_with_details,
-    inputs=gr.Textbox(
-        lines=10, 
-        label="Product Reviews (one per line)", 
-        value=EXAMPLE_REVIEWS
-    ),
-    outputs=[
-        gr.Textbox(lines=15, label="Processing Progress", elem_classes=["output-box"]),
-        gr.Textbox(lines=2, label="Performance Metrics", elem_classes=["output-box"]),
-        gr.Textbox(lines=10, label="Final Summaries", elem_classes=["output-box"])
+    fn=process_product_info,
+    inputs=[
+        gr.Textbox(
+            lines=15, 
+            label="Product Information", 
+            value=EXAMPLE_PRODUCT
+        ),
+        gr.Radio(
+            choices=["Sequential", "Parallel", "Compare Both"],
+            label="Execution Mode",
+            value="Compare Both"
+        )
     ],
-    title="Product Review Summarization - Parallelization Pattern",
-    description="This example demonstrates the parallelization pattern using a product review summarization system. Parallelization in GenAI applications involves processing multiple inputs simultaneously using multiple threads or processes. This can significantly reduce the overall processing time for large numbers of similar tasks. Watch as multiple reviews are processed simultaneously. Try to remove/add reviews and note that processing time stays relatively the same.",
+    outputs=[
+        gr.Textbox(lines=6, label="Processing Progress and Performance Metrics"),
+        gr.Textbox(lines=10, label="Email Marketing Content"),
+        gr.Textbox(lines=10, label="Instagram Content"),
+        gr.Textbox(lines=15, label="Website Content")
+    ],
+    title="Marketing Content Generator - Parallelization Pattern",
+    description="""Parallelization in GenAI applications involves processing multiple inputs simultaneously using multiple threads or processes. This can significantly reduce the overall processing time for large numbers of similar tasks. 
+    
+    This example demonstrates the parallelization pattern by generating marketing content for multiple platforms.
+    You can compare sequential vs parallel execution to see the performance benefits of parallelization.
+    - Sequential: Generates content for each platform one after another
+    - Parallel: Generates content for all platforms simultaneously
+    - Compare Both: Runs both methods and shows the performance improvement""",
     allow_flagging="never"
 )
 

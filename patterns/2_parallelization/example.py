@@ -4,7 +4,14 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import concurrent.futures
-from common.bedrock_client import invoke_model, get_completion_from_response
+from src.utils import (
+    create_bedrock_client,
+    text_completion,
+    NOVA_LITE
+)
+
+# Create a client once to be reused
+bedrock_client = create_bedrock_client()
 
 def generate_email_content(product_info):
     prompt = f"""
@@ -20,8 +27,8 @@ def generate_email_content(product_info):
     ---
     [your email body]
     """
-    response = invoke_model(prompt)
-    return {"platform": "email", "content": get_completion_from_response(response)}
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return {"platform": "email", "content": response}
 
 def generate_instagram_content(product_info):
     prompt = f"""
@@ -34,8 +41,8 @@ def generate_instagram_content(product_info):
     Product Information:
     {product_info}
     """
-    response = invoke_model(prompt)
-    return {"platform": "instagram", "content": get_completion_from_response(response)}
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return {"platform": "instagram", "content": response}
 
 def generate_website_content(product_info):
     prompt = f"""
@@ -49,8 +56,8 @@ def generate_website_content(product_info):
     Product Information:
     {product_info}
     """
-    response = invoke_model(prompt)
-    return {"platform": "website", "content": get_completion_from_response(response)}
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return {"platform": "website", "content": response}
 
 def generate_marketing_content_sequential(product_info):
     start_time = time.time()

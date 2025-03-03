@@ -1,3 +1,5 @@
+TODO: MAKE PROMPT OPTIMISATION INSTEAD! <3 <3
+
 # Evaluator-Optimizer Pattern Example: Email Subject Line Generator
 
 This example demonstrates the evaluator-optimizer pattern using an automated email subject line generator for marketing campaigns.
@@ -22,7 +24,7 @@ In this example, we have three main components:
 pip install -r requirements.txt
 
 3. Run the script:
-python example.py
+   python example.py
 
 ## Running the Gradio Interface
 
@@ -32,19 +34,17 @@ To run the Gradio interface for this pattern:
 
 pip install -r requirements.txt pip install gradio
 
-
 2. Run the Gradio app:
-python gradio_app.py
-
+   python gradio_app.py
 
 3. Open your web browser and go to the URL displayed in the console (usually `http://127.0.0.1:7860`).
 
 4. Use the interface to interact with the pattern implementation.
 
-
 ## Expected Output
 
 The script will run through multiple iterations of generating and evaluating subject lines. For each iteration, it will display:
+
 - Generated subject lines and their scores
 - Feedback for improvement
 - The best subject line and its score after all iterations

@@ -3,8 +3,15 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from common.bedrock_client import invoke_model, get_completion_from_response
-from common.utils import extract_and_load_json
+from src.utils import (
+    create_bedrock_client,
+    text_completion,
+    extract_json_from_text,
+    NOVA_LITE
+)
+
+# Create a client once to be reused
+bedrock_client = create_bedrock_client()
 
 def analyze_inquiry(inquiry):
     prompt = f"""
@@ -13,8 +20,8 @@ def analyze_inquiry(inquiry):
 
     Customer Inquiry: "{inquiry}"
     """
-    response = invoke_model(prompt)
-    return extract_and_load_json(get_completion_from_response(response))
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return extract_json_from_text(response)
 
 def generate_response_points(analysis):
     prompt = f"""
@@ -23,8 +30,8 @@ def generate_response_points(analysis):
 
     Analysis: {analysis}
     """
-    response = invoke_model(prompt)
-    return extract_and_load_json(get_completion_from_response(response))
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return extract_json_from_text(response)
 
 def craft_email(analysis, points):
     prompt = f"""
@@ -36,8 +43,8 @@ def craft_email(analysis, points):
 
     Begin the email with 'Dear Customer,' and end it with 'Best regards, Customer Support Team'.
     """
-    response = invoke_model(prompt)
-    return get_completion_from_response(response)
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return response
 
 def generate_support_email(customer_inquiry):
     # Step 1: Analyze the inquiry

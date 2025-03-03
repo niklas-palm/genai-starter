@@ -3,8 +3,15 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from common.bedrock_client import invoke_model, get_completion_from_response
-from common.utils import extract_and_load_json
+from src.utils import (
+    create_bedrock_client,
+    text_completion,
+    extract_json_from_text,
+    NOVA_LITE
+)
+
+# Create a client once to be reused
+bedrock_client = create_bedrock_client()
 
 def classify_inquiry(inquiry):
     prompt = f"""
@@ -15,40 +22,40 @@ def classify_inquiry(inquiry):
 
     Customer Inquiry: "{inquiry}"
     """
-    response = invoke_model(prompt)
-    return extract_and_load_json(get_completion_from_response(response))
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return extract_json_from_text(response)
 
 def technical_support_response(inquiry, language):
     prompt = f"""
     Generate a technical support response in {language} for the following inquiry:
     "{inquiry}"
     """
-    response = invoke_model(prompt)
-    return get_completion_from_response(response)
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return response
 
 def billing_inquiry_response(inquiry, language):
     prompt = f"""
     Generate a billing-related response in {language} for the following inquiry:
     "{inquiry}"
     """
-    response = invoke_model(prompt)
-    return get_completion_from_response(response)
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return response
 
 def product_info_response(inquiry, language):
     prompt = f"""
     Generate a product information response in {language} for the following inquiry:
     "{inquiry}"
     """
-    response = invoke_model(prompt)
-    return get_completion_from_response(response)
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return response
 
 def general_inquiry_response(inquiry, language):
     prompt = f"""
     Generate a general response in {language} for the following inquiry:
     "{inquiry}"
     """
-    response = invoke_model(prompt)
-    return get_completion_from_response(response)
+    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+    return response
 
 def route_and_respond(inquiry):
     # Step 1: Classify the inquiry

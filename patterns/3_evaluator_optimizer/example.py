@@ -3,8 +3,15 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from common.bedrock_client import invoke_model, get_completion_from_response
-from common.utils import extract_and_load_json
+from src.utils import (
+    create_bedrock_client,
+    text_completion,
+    extract_json_from_text,
+    NOVA_LITE
+)
+
+# Create a client once to be reused
+bedrock_client = create_bedrock_client()
 
 class SubjectLineGenerator:
     def generate(self, email_content, num_options=5):
@@ -16,8 +23,8 @@ class SubjectLineGenerator:
         Email content:
         {email_content}
         """
-        response = invoke_model(prompt)
-        return extract_and_load_json(get_completion_from_response(response))
+        response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+        return extract_json_from_text(response)
 
 class SubjectLineEvaluator:
     def evaluate(self, subject_line, email_content):
@@ -34,8 +41,8 @@ class SubjectLineEvaluator:
         Return the result as a JSON object with keys 'relevance', 'catchiness', 'clarity', 'urgency', and 'total_score'.
         The 'total_score' should be the sum of all other scores.
         """
-        response = invoke_model(prompt)
-        return extract_and_load_json(get_completion_from_response(response))
+        response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
+        return extract_json_from_text(response)
 
 class SubjectLineOptimizer:
     def __init__(self, generator, evaluator):
@@ -64,7 +71,7 @@ class SubjectLineOptimizer:
             Based on the best subject line so far: "{best_subject_line}"
             Provide brief feedback on how to improve for the next iteration.
             """
-            feedback = get_completion_from_response(invoke_model(feedback_prompt))
+            feedback = text_completion(bedrock_client, feedback_prompt, model_id=NOVA_LITE)
             print(f"\nFeedback for next iteration: {feedback}")
 
             # Update email_content with feedback for next iteration

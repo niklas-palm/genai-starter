@@ -6,12 +6,19 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 import concurrent.futures
 from src.utils import (
     create_bedrock_client,
-    text_completion,
+    generate_conversation,
     NOVA_LITE
 )
 
 # Create a client once to be reused
 bedrock_client = create_bedrock_client()
+
+# System prompt for improved consistency across all interactions
+SYSTEM_PROMPT = """
+You are an AI assistant specializing in marketing content creation.
+Create engaging, concise, and effective marketing content tailored for different platforms.
+Focus on highlighting product benefits and value propositions.
+"""
 
 def generate_email_content(product_info):
     prompt = f"""
@@ -27,8 +34,20 @@ def generate_email_content(product_info):
     ---
     [your email body]
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return {"platform": "email", "content": response}
+    response = generate_conversation(
+        client=bedrock_client,
+        prompt=prompt,
+        model_id=NOVA_LITE,
+        system_prompt=SYSTEM_PROMPT
+    )
+    
+    # Extract text from response
+    output_message = response["output"]["message"]
+    for content in output_message["content"]:
+        if "text" in content:
+            return {"platform": "email", "content": content["text"]}
+    
+    return {"platform": "email", "content": "Error: No content generated"}
 
 def generate_instagram_content(product_info):
     prompt = f"""
@@ -41,8 +60,20 @@ def generate_instagram_content(product_info):
     Product Information:
     {product_info}
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return {"platform": "instagram", "content": response}
+    response = generate_conversation(
+        client=bedrock_client,
+        prompt=prompt,
+        model_id=NOVA_LITE,
+        system_prompt=SYSTEM_PROMPT
+    )
+    
+    # Extract text from response
+    output_message = response["output"]["message"]
+    for content in output_message["content"]:
+        if "text" in content:
+            return {"platform": "instagram", "content": content["text"]}
+    
+    return {"platform": "instagram", "content": "Error: No content generated"}
 
 def generate_website_content(product_info):
     prompt = f"""
@@ -56,8 +87,20 @@ def generate_website_content(product_info):
     Product Information:
     {product_info}
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return {"platform": "website", "content": response}
+    response = generate_conversation(
+        client=bedrock_client,
+        prompt=prompt,
+        model_id=NOVA_LITE,
+        system_prompt=SYSTEM_PROMPT
+    )
+    
+    # Extract text from response
+    output_message = response["output"]["message"]
+    for content in output_message["content"]:
+        if "text" in content:
+            return {"platform": "website", "content": content["text"]}
+    
+    return {"platform": "website", "content": "Error: No content generated"}
 
 def generate_marketing_content_sequential(product_info):
     start_time = time.time()

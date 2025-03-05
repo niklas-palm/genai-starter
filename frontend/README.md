@@ -1,30 +1,31 @@
-# Bedrock Text Completion Frontend
-
-A lightweight Gradio interface for AWS Bedrock text completions.
+# Bedrock API Frontend Examples
 
 ## Setup
-
-1. Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Ensure you have proper AWS credentials configured with Bedrock access.
+## Running
 
-## Running the App
-
-To start the Gradio app:
-
+### Basic Chat (Non-Streaming)
 ```bash
-# Run from the project root directory, not inside the frontend folder
-python frontend/app.py
+python frontend/app.py  # Available at http://127.0.0.1:7861
 ```
 
-The app will be available at http://127.0.0.1:7860 in your browser.
+### Streaming Chat
+```bash
+python frontend/app_streaming.py  # Available at http://127.0.0.1:7862
+```
 
-## Features
+## Examples
 
-- Simple text completion using AWS Bedrock models
-- Support for multiple models (Claude 3.5 Sonnet, Claude 3.5 Haiku, Nova Lite, Nova Pro)
-- Adjustable temperature parameter
+### app.py
+- Basic chat with AWS Bedrock Converse API
+- Non-streaming responses
+- Returns complete responses at once
+
+### app_streaming.py
+- Identical UI to app.py
+- Uses real-time token streaming
+- Threaded implementation with callbacks

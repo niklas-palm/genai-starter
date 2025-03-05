@@ -6,12 +6,20 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from src.utils import (
     create_bedrock_client,
     text_completion,
+    generate_conversation,
     extract_json_from_text,
     NOVA_LITE
 )
 
 # Create a client once to be reused
 bedrock_client = create_bedrock_client()
+
+# System prompt for better consistency across all interactions
+SYSTEM_PROMPT = """
+You are an AI assistant helping with customer service tasks.
+Always provide factual, helpful responses.
+When asked to return JSON, format it properly within ```json code blocks.
+"""
 
 def analyze_inquiry(inquiry):
     prompt = f"""
@@ -20,8 +28,19 @@ def analyze_inquiry(inquiry):
 
     Customer Inquiry: "{inquiry}"
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return extract_json_from_text(response)
+    response = generate_conversation(
+        client=bedrock_client,
+        prompt=prompt,
+        model_id=NOVA_LITE,
+        system_prompt=SYSTEM_PROMPT
+    )
+    
+    # Extract text from response
+    output_message = response["output"]["message"]
+    for content in output_message["content"]:
+        if "text" in content:
+            return extract_json_from_text(content["text"])
+
 
 def generate_response_points(analysis):
     prompt = f"""
@@ -30,8 +49,19 @@ def generate_response_points(analysis):
 
     Analysis: {analysis}
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return extract_json_from_text(response)
+    response = generate_conversation(
+        client=bedrock_client,
+        prompt=prompt,
+        model_id=NOVA_LITE,
+        system_prompt=SYSTEM_PROMPT
+    )
+    
+    # Extract text from response
+    output_message = response["output"]["message"]
+    for content in output_message["content"]:
+        if "text" in content:
+            return extract_json_from_text(content["text"])
+
 
 def craft_email(analysis, points):
     prompt = f"""
@@ -43,8 +73,19 @@ def craft_email(analysis, points):
 
     Begin the email with 'Dear Customer,' and end it with 'Best regards, Customer Support Team'.
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return response
+    response = generate_conversation(
+        client=bedrock_client,
+        prompt=prompt,
+        model_id=NOVA_LITE,
+        system_prompt=SYSTEM_PROMPT
+    )
+    
+    # Extract text from response
+    output_message = response["output"]["message"]
+    for content in output_message["content"]:
+        if "text" in content:
+            return content["text"]
+
 
 def generate_support_email(customer_inquiry):
     # Step 1: Analyze the inquiry
@@ -60,6 +101,7 @@ def generate_support_email(customer_inquiry):
     print("\nGenerated Email:\n", email)
 
     return email
+
 
 # Example usage
 if __name__ == "__main__":

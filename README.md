@@ -1,73 +1,87 @@
 # GenAI Hackathon Assets
 
-This repository contains lightweight samples that showcase common design patterns when building generative AI applications. It's designed to help developers go from zero to hero with iterative, easy-to-follow steps.
-
-## Overview
-
-This repository provides a progressive approach to learning generative AI with Amazon Bedrock. Each notebook builds on skills from the previous one, allowing you to incrementally develop your GenAI skills.
-
-1. **0_prompt_engineering.ipynb**: Learn the basics of prompt engineering, structuring prompts, and getting structured outputs
-2. **1_multimodal_inputs.ipynb**: Explore working with text, images, and videos using Amazon Bedrock Nova
-3. **patterns/**: Explore common design patterns for GenAI applications:
-   - Prompt chaining
-   - Routing
-   - Parallelization
-   - Orchestration with workers
-   - Evaluation and optimization
-   - Agents and multi-agent systems
+This repository contains lightweight samples that showcase common prompt engineering techniques and design patterns when building generative AI applications with AWS Bedrock.
 
 ## Prerequisites
 
 - Active AWS credentials in the environment
 - AWS region with Bedrock service access (default: us-west-2)
-- Access to the models used in the notebooks (Claude and Nova)
-
-## Usage
-
-1. Install dependencies
+- Access to the Claude and Nova models in your AWS account.
 
 ```bash
 pip install -r requirements.txt
 ```
 
-2. Navigate through the notebooks in numerical order:
-   - Start with `0_prompt_engineering.ipynb`
-   - Continue to `1_multimodal_inputs.ipynb`
-   - Explore the patterns in the `patterns/` directory
+## Notebooks
 
-3. Each notebook contains:
-   - Step-by-step explanations
-   - Code examples that you can run
-   - Progressive complexity to build your skills
+Start learning with these notebooks:
 
-## Central Utility Files
+### 0_prompt_engineering.ipynb
 
-The repository includes centralized utility functions in `src/utils/bedrock_utils.py` to simplify working with the Bedrock API:
+- Learn prompt engineering fundamentals
+- Structure prompts for better results
+- Extract structured outputs
+- Implement advanced techniques like Chain of Thought and self-verification
+
+### 1_multimodal_inputs.ipynb
+
+- Work with multimodal inputs (text, images, videos)
+- Learn image and video analysis with Amazon Bedrock Nova
+
+## Frontend Examples
+
+The `frontend/` directory contains sample Gradio applications demonstrating how to build simple chat interfaces with AWS Bedrock:
+
+- **app.py**: Basic chat application using AWS Bedrock Converse API
+- **app_streaming.py**: Identical UI but with real-time token streaming
+
+These examples show how to:
+
+- Create chat interfaces with Gradio
+- Manage conversation history
+- Implement both standard and streaming responses
+
+To run:
+
+```bash
+# Basic chat
+python frontend/app.py  # Available at http://127.0.0.1:7861
+
+# Streaming chat
+python frontend/app_streaming.py  # Available at http://127.0.0.1:7862
+```
+
+## Design Patterns
+
+The `patterns/` directory includes common GenAI design patterns:
+
+### 0_prompt_chaining
+
+- Chain multiple prompts together
+- Build complex workflows with sequential steps
+
+### 1_routing
+
+- Implement intelligent routing between different models
+- Route requests based on content and skills
+
+### 2_parallelization
+
+- Process multiple requests in parallel
+- Aggregate results from multiple model calls
+
+### 3_evaluator_optimizer
+
+- Implement self-evaluation techniques
+- Optimize outputs based on evaluation criteria
+
+## Utility Functions
+
+The repository includes centralized utility functions in `src/utils/bedrock_converse_utils.py`:
 
 - `create_bedrock_client`: Create a Bedrock client
-- `invoke_model`: Send requests to Bedrock models
+- `text_completion`: Send basic text prompts
+- `invoke_with_media`: Unified function for text, images, and videos
+- `generate_conversation`: Create conversations with history
+- `stream_conversation`: Stream model responses in real-time
 - `extract_json_from_text`: Extract structured data from responses
-
-## Learning Path
-
-This repo will guide you through:
-
-1. **Basic concepts**:
-   - Prompt engineering fundamentals
-   - Structured prompts and outputs
-   - Working with multimodal inputs
-
-2. **Advanced techniques**:
-   - Response prefilling for structured outputs
-   - Entity extraction
-   - Chain of thought reasoning
-   - Classification and routing
-
-3. **Design patterns**:
-   - Building robust GenAI applications
-   - Implementing best practices
-   - Creating complex workflows
-
-## Contributing
-
-Feel free to submit issues or pull requests to improve these examples!

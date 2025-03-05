@@ -1,12 +1,12 @@
-from .bedrock_utils import (
+from .bedrock_converse_utils import (
     create_bedrock_client,
     text_completion,
-    invoke_with_image,
-    invoke_with_video,
+    invoke_with_media,
     extract_json_from_text,
+    read_file,
+    generate_conversation,
+    stream_conversation,
     invoke_with_prefill,
-    encode_image,
-    encode_video,
     CLAUDE_3_5_SONNET,
     CLAUDE_3_5_HAIKU,
     NOVA_LITE,

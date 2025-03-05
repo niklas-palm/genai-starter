@@ -5,13 +5,20 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from src.utils import (
     create_bedrock_client,
-    text_completion,
+    generate_conversation,
     extract_json_from_text,
     NOVA_LITE
 )
 
 # Create a client once to be reused
 bedrock_client = create_bedrock_client()
+
+# System prompt for improved consistency across all interactions
+SYSTEM_PROMPT = """
+You are an AI assistant helping with customer service tasks.
+Always provide factual, helpful responses.
+When asked to return JSON, format it properly within ```json code blocks.
+"""
 
 def classify_inquiry(inquiry):
     prompt = f"""
@@ -22,40 +29,53 @@ def classify_inquiry(inquiry):
 
     Customer Inquiry: "{inquiry}"
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return extract_json_from_text(response)
+    response = generate_conversation(
+        client=bedrock_client,
+        prompt=prompt,
+        model_id=NOVA_LITE,
+        system_prompt=SYSTEM_PROMPT
+    )
+    
+    # Extract text from response
+    output_message = response["output"]["message"]
+    for content in output_message["content"]:
+        if "text" in content:
+            return extract_json_from_text(content["text"])
 
-def technical_support_response(inquiry, language):
-    prompt = f"""
-    Generate a technical support response in {language} for the following inquiry:
-    "{inquiry}"
+def generate_response(inquiry, language, category):
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return response
-
-def billing_inquiry_response(inquiry, language):
-    prompt = f"""
-    Generate a billing-related response in {language} for the following inquiry:
-    "{inquiry}"
+    Unified response generator with routing handled via the prompt.
+    This simplifies the code by using a single function instead of four separate ones.
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return response
-
-def product_info_response(inquiry, language):
+    # Create a prompt based on the category
+    category_instructions = {
+        "Technical": "Provide troubleshooting steps and technical instructions.",
+        "Billing": "Explain billing policies, payment options, and account information.",
+        "Product": "Describe product features, specifications, and usage instructions.",
+        "General": "Provide general information and friendly guidance."
+    }
+    
+    instructions = category_instructions.get(category, category_instructions["General"])
+    
     prompt = f"""
-    Generate a product information response in {language} for the following inquiry:
+    Generate a {category.lower()}-related response in {language} for the following inquiry:
     "{inquiry}"
+    
+    Additional instructions: {instructions}
     """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return response
-
-def general_inquiry_response(inquiry, language):
-    prompt = f"""
-    Generate a general response in {language} for the following inquiry:
-    "{inquiry}"
-    """
-    response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-    return response
+    
+    response = generate_conversation(
+        client=bedrock_client,
+        prompt=prompt,
+        model_id=NOVA_LITE,
+        system_prompt=SYSTEM_PROMPT
+    )
+    
+    # Extract text from response
+    output_message = response["output"]["message"]
+    for content in output_message["content"]:
+        if "text" in content:
+            return content["text"]
 
 def route_and_respond(inquiry):
     # Step 1: Classify the inquiry
@@ -65,16 +85,10 @@ def route_and_respond(inquiry):
     # Step 2: Route to the appropriate response generator based on category
     category = classification['category']
     language = classification['language']
-
-    if category == 'Technical':
-        response = technical_support_response(inquiry, language)
-    elif category == 'Billing':
-        response = billing_inquiry_response(inquiry, language)
-    elif category == 'Product':
-        response = product_info_response(inquiry, language)
-    else:  # General
-        response = general_inquiry_response(inquiry, language)
-
+    
+    # Use the unified response generator with the appropriate parameters
+    response = generate_response(inquiry, language, category)
+    
     print(f"\nGenerated Response ({language}):\n", response)
     return response
 

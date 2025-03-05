@@ -5,13 +5,21 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from src.utils import (
     create_bedrock_client,
-    text_completion,
+    generate_conversation,
     extract_json_from_text,
+    invoke_with_prefill,
     NOVA_LITE
 )
 
 # Create a client once to be reused
 bedrock_client = create_bedrock_client()
+
+# System prompt for better consistency 
+SYSTEM_PROMPT = """
+You are an AI assistant helping with email marketing optimization.
+When asked for JSON output, always format properly within ```json code blocks.
+Focus on creating compelling, concise, and effective email subject lines.
+"""
 
 class SubjectLineGenerator:
     def generate(self, email_content, num_options=5):
@@ -23,8 +31,21 @@ class SubjectLineGenerator:
         Email content:
         {email_content}
         """
-        response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-        return extract_json_from_text(response)
+        # Using prefill to ensure proper JSON structure
+        prefill = """```json
+[
+  """
+        
+        result = invoke_with_prefill(
+            client=bedrock_client,
+            prompt=prompt,
+            prefill=prefill,
+            model_id=NOVA_LITE,
+        )
+        
+        # Combine prefill with result
+        full_result = prefill + result
+        return extract_json_from_text(full_result)
 
 class SubjectLineEvaluator:
     def evaluate(self, subject_line, email_content):
@@ -41,8 +62,20 @@ class SubjectLineEvaluator:
         Return the result as a JSON object with keys 'relevance', 'catchiness', 'clarity', 'urgency', and 'total_score'.
         The 'total_score' should be the sum of all other scores.
         """
-        response = text_completion(bedrock_client, prompt, model_id=NOVA_LITE)
-        return extract_json_from_text(response)
+        response = generate_conversation(
+            client=bedrock_client,
+            prompt=prompt,
+            model_id=NOVA_LITE,
+            system_prompt=SYSTEM_PROMPT
+        )
+        
+        # Extract text from response
+        output_message = response["output"]["message"]
+        for content in output_message["content"]:
+            if "text" in content:
+                return extract_json_from_text(content["text"])
+        
+        return {"total_score": 0}  # Default in case of failure
 
 class SubjectLineOptimizer:
     def __init__(self, generator, evaluator):
@@ -67,16 +100,30 @@ class SubjectLineOptimizer:
                     best_score = evaluation['total_score']
 
             # Feedback for next iteration
-            feedback_prompt = f"""
-            Based on the best subject line so far: "{best_subject_line}"
-            Provide brief feedback on how to improve for the next iteration.
-            """
-            feedback = text_completion(bedrock_client, feedback_prompt, model_id=NOVA_LITE)
-            print(f"\nFeedback for next iteration: {feedback}")
-
-            # Update email_content with feedback for next iteration
-            email_content += f"\nImprovement feedback: {feedback}"
-
+            if i < iterations - 1:  # Don't need feedback after the last iteration
+                feedback_prompt = f"""
+                Based on the best subject line so far: "{best_subject_line}" with score {best_score},
+                provide brief feedback on how to improve for the next iteration.
+                """
+                
+                response = generate_conversation(
+                    client=bedrock_client,
+                    prompt=feedback_prompt,
+                    model_id=NOVA_LITE,
+                    system_prompt=SYSTEM_PROMPT
+                )
+                
+                # Extract text from response
+                output_message = response["output"]["message"]
+                for content in output_message["content"]:
+                    if "text" in content:
+                        feedback = content["text"]
+                
+                print(f"\nFeedback for next iteration: {feedback}")
+                
+                # Update email_content with feedback for next iteration
+                email_content += f"\nImprovement feedback: {feedback}"
+        
         return best_subject_line, best_score
 
 # Example usage

@@ -2,6 +2,8 @@
 
 This example demonstrates the prompt chaining pattern using a customer support email generator.
 
+![overview](diagram.png)
+
 ## What is Prompt Chaining?
 
 Prompt chaining is a technique where the output of one prompt is used as input for the next prompt in a sequence. This allows for more complex tasks to be broken down into smaller, manageable steps, each building upon the previous one.
@@ -33,10 +35,8 @@ To run the Gradio interface for this pattern:
 
 pip install -r requirements.txt pip install gradio
 
-
 2. Run the Gradio app:
-python gradio_app.py
-
+   python gradio_app.py
 
 3. Open your web browser and go to the URL displayed in the console (usually `http://127.0.0.1:7860`).
 

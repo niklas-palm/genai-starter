@@ -2,6 +2,8 @@
 
 This example demonstrates the parallelization pattern using a product review summarization system.
 
+![overview](diagram.png)
+
 ## What is Parallelization?
 
 Parallelization in GenAI applications involves processing multiple inputs simultaneously using multiple threads or processes. This can significantly reduce the overall processing time for large numbers of similar tasks.
@@ -22,7 +24,7 @@ In this example, we parallelize the summarization of multiple product reviews:
 pip install -r requirements.txt
 
 3. Run the script:
-python example.py
+   python example.py
 
 ## Running the Gradio Interface
 
@@ -32,15 +34,12 @@ To run the Gradio interface for this pattern:
 
 pip install -r requirements.txt pip install gradio
 
-
 2. Run the Gradio app:
-python gradio_app.py
-
+   python gradio_app.py
 
 3. Open your web browser and go to the URL displayed in the console (usually `http://127.0.0.1:7860`).
 
 4. Use the interface to interact with the pattern implementation.
-
 
 ## Expected Output
 

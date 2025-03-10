@@ -2,6 +2,8 @@
 
 This example demonstrates the routing pattern using a multi-lingual customer inquiry system.
 
+![overview](diagram.png)
+
 ## What is Routing?
 
 Routing in the context of GenAI applications involves directing inputs to different models or processes based on certain criteria. This allows for more specialized and efficient handling of diverse inputs.
@@ -32,10 +34,8 @@ To run the Gradio interface for this pattern:
 
 pip install -r requirements.txt pip install gradio
 
-
 2. Run the Gradio app:
-python gradio_app.py
-
+   python gradio_app.py
 
 3. Open your web browser and go to the URL displayed in the console (usually `http://127.0.0.1:7860`).
 
@@ -48,5 +48,3 @@ The script will process multiple inquiries, printing the classification and gene
 ## Customization
 
 You can modify the `inquiries` list in the `example.py` file to test different scenarios and languages.
-
-
